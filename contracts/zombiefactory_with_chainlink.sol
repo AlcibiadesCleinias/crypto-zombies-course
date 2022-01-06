@@ -5,6 +5,7 @@ import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
 /// @dev tiny zombiefactory version but with randomess from oracles.
 /// @dev All cont chainlink values as in rinkeby:
 /// @dev https://docs.chain.link/docs/vrf-contracts/
+/// @dev In the contract randomess is not used: kinda todo.
 contract ZombieFactory is VRFConsumerbase {
 
     uint dnaDigits = 16;
