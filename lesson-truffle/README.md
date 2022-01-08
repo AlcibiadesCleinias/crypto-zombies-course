@@ -1,7 +1,9 @@
 # Work with Truffle
 
 ## Requirement
-Use node version v14.18.1
+- Use node version v14.18.1
+- `chai` installed (`npm -g install chai && npm install --save-dev chai`)
+- loop provider installed (`npm install loom-truffle-provider@0.15.0`)
 
 Init project
 ```
@@ -17,4 +19,6 @@ Publish on rinkeby (before setup `truffle-config.js` accordingly)
 ```bash
 truffle migrate --network rinkeby
 ```
+
+Deploy to Basenet - merely read a bunch of txt https://loomx.io/developers/en/deploy-loom-mainnet.html#deploying-to-basechain
 

@@ -19,9 +19,21 @@
  */
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
+const LoomTruffleProvider = require('loom-truffle-provider');
+
+const { readFileSync } = require('fs')
+const path = require('path')
+const { join } = require('path')
 //
 // const fs = require('fs');
 const mnemonic = "";  //fs.readFileSync(".secret").toString().trim(); // todo
+const loomPrivateKey = '';
+const infuraKey = "";
+
+function getLoomProviderWithPrivateKey (privateKeyPath, chainId, writeUrl, readUrl) {
+  const privateKey = readFileSync(privateKeyPath, 'utf-8');
+  return new LoomTruffleProvider(chainId, writeUrl, readUrl, privateKey);
+}
 
 module.exports = {
   /**
@@ -39,7 +51,7 @@ module.exports = {
     mainnet: {
       provider: function () {
         // Setting the provider with the Infura Mainnet address and Token
-        return new HDWalletProvider(mnemonic, "https://mainnet.infura.io/v3/YOUR_TOKEN") // todo: token
+        return new HDWalletProvider(mnemonic, "https://mainnet.infura.io/v3/YOUR_TOKEN") // todo: nono
       },
       network_id: "1"
     },
@@ -48,10 +60,30 @@ module.exports = {
       // Special function to setup the provider
       provider: function () {
         // Setting the provider with the Infura Rinkeby address and Token
-        return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/")
+        return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/" + infuraKey)
       },
       // Network id is 4 for Rinkeby
       network_id: 4
+    },
+    loom_testnet: {
+      provider: function() {
+          const privateKey = loomPrivateKey;
+          const chainId = 'extdev-plasma-us1';
+          const writeUrl = 'wss://extdev-basechain-us1.dappchains.com/websocket';
+          const readUrl = 'wss://extdev-basechain-us1.dappchains.com/queryws';
+          return new LoomTruffleProvider(chainId, writeUrl, readUrl, privateKey);
+      },
+      network_id: '9545242630824'
+    },
+    basechain: {
+      provider: function() {
+        const chainId = 'default';
+        const writeUrl = 'http://basechain.dappchains.com/rpc';
+        const readUrl = 'http://basechain.dappchains.com/query';
+        const privateKeyPath = path.join(__dirname, 'mainnet_private_key');
+        return getLoomProviderWithPrivateKey(privateKeyPath, chainId, writeUrl, readUrl);
+        },
+      network_id: '*'
     }
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
