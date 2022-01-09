@@ -8,9 +8,12 @@ const MAX_RETRIES = process.env.MAX_RETRIES || 5
 const OracleJSON = require('./oracle/build/contracts/EthPriceOracle.json')
 var pendingRequests = []
 
+const NETWORK_ID = 9545242630824  //todo: rehardcode
+
 async function getOracleContract (web3js) {
   const networkId = await web3js.eth.net.getId()
-  return new web3js.eth.Contract(OracleJSON.abi, OracleJSON.networks[networkId].address)
+  console.log('strange network id', networkId, 'pass it')
+  return new web3js.eth.Contract(OracleJSON.abi, OracleJSON.networks[NETWORK_ID].address) //OracleJSON.networks[networkId].address)
 }
 
 async function filterEvents (oracleContract, web3js) {
