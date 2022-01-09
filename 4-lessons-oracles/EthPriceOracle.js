@@ -84,6 +84,7 @@ async function setLatestEthPrice (oracleContract, callerAddress, ownerAddress, e
     await oracleContract.methods.setLatestEthPrice(ethPriceInt.toString(), callerAddress, idInt.toString()).send({ from: ownerAddress })
   } catch (error) {
     console.log('Error encountered while calling setLatestEthPrice.')
+    console.log(error)
     // Do some error handling
   }
 }
