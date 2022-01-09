@@ -10,6 +10,17 @@ var pendingRequests = []
 
 const NETWORK_ID = 9545242630824  //todo: rehardcode
 
+async function retrieveLatestEthPrice () {
+  const resp = await axios({
+    url: 'https://api.binance.com/api/v3/ticker/price',
+    params: {
+      symbol: 'ETHUSDT'
+    },
+    method: 'get'
+  })
+  return resp.data.price
+}
+
 async function getOracleContract (web3js) {
   const networkId = await web3js.eth.net.getId()
   console.log('strange network id', networkId, 'pass it')
@@ -54,6 +65,7 @@ async function processRequest (oracleContract, ownerAddress, id, callerAddress) 
       await setLatestEthPrice(oracleContract, callerAddress, ownerAddress, ethPrice, id)
       return
     } catch (error) {
+      console.log(error)
       if (retries === MAX_RETRIES - 1) {
         await setLatestEthPrice(oracleContract, callerAddress, ownerAddress, '0', id)
         return

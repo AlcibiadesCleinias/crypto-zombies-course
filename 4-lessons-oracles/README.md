@@ -1,5 +1,16 @@
 ## Shorcuts
+Checkout scripts section of `package.json`
+
+## Requirement
+- node v10.19.0
+- truffle installed globally
+
+## Start Oracle
+```bash
+node EthPriceOracle.js
 ```
-cd oracle && npx truffle migrate --network extdev --reset -all && cd ..
-cd caller && npx truffle migrate --network extdev --reset -all && cd ..
+
+## Start Tiny Client
+```bash
+node Client.js
 ```

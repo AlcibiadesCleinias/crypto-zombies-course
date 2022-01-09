@@ -16,8 +16,8 @@
   "dependencies": {
     "axios": "^0.24.0",
     "bn.js": "^5.2.0",
-    "loom-js": "^1.15.0",
-    "loom-truffle-provider": "^0.15.0",
+    "loom-js": "^1.55.0",
+    "loom-truffle-provider": "^0.16.0",
     "openzeppelin-solidity": "^4.4.1"
   }
 }
