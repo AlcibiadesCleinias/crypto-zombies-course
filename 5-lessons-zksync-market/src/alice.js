@@ -29,10 +29,11 @@
 
   console.log('Transferring')
   const transferFee = await utils.getFee('Transfer', process.env.BOB_ADDRESS, token, zkSyncProvider, ethers)
-  console.log('Transfer fee = ', transferFee) // specify receiver
+  console.log('Transfer fee = ', transferFee) // specify receiver instead of sender
   await utils.transfer(aliceZkSyncWallet, process.env.BOB_ADDRESS, amountToTransfer, transferFee, token, zksync, ethers)
 
   console.log('Withdrawing')
   const withdrawalFee = await utils.getFee('Withdraw', aliceRinkebyWallet.address, token, zkSyncProvider, ethers)
+  console.log('withdrawal fee = ', withdrawalFee)
   await utils.withdrawToEthereum(aliceZkSyncWallet, amountToWithdraw, withdrawalFee, token, zksync, ethers)
 })()
