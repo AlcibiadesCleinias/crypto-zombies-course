@@ -1,7 +1,3 @@
-const ethers = require('ethers')
-const feeToken = 'ETH'
-const setSignKeyFee = 0.001.toString()
-
 async function getZkSyncProvider (zksync, networkName) {
   let zkSyncProvider
   try {
@@ -30,24 +26,24 @@ async function initAccount (rinkebyWallet, zkSyncProvider, zksync) {
   return zkSyncWallet
 }
 
-async function registerAccount (wallet) {
+async function registerAccount (wallet, token, tokenSet, registerFee) {
   console.log(`Registering the ${wallet.address()} account on zkSync`)
   if (!await wallet.isSigningKeySet()) {
     if (await wallet.getAccountId() === undefined) {
       throw new Error('Unknown account')
     }
     const changePubkey = await wallet.setSigningKey(
-        { feeToken: feeToken, fee: ethers.utils.parseEther(setSignKeyFee), ethAuthType: "ECDSA"})
+        { feeToken: token, fee: tokenSet.formatToken(token, registerFee), ethAuthType: "ECDSA"})
     await changePubkey.awaitReceipt()
   }
   console.log(`Account ${wallet.address()} registered`)
 }
 
-async function depositToZkSync (zkSyncWallet, token, amountToDeposit, ethers) {
+async function depositToZkSync (zkSyncWallet, token, amountToDeposit, tokenSet) {
   const deposit = await zkSyncWallet.depositToSyncFromEthereum({
     depositTo: zkSyncWallet.address(),
     token: token,
-    amount: ethers.utils.parseEther(amountToDeposit)
+    amount: tokenSet.parseToken(token, amountToDeposit)
   })
   try {
     await deposit.awaitReceipt()
@@ -57,11 +53,9 @@ async function depositToZkSync (zkSyncWallet, token, amountToDeposit, ethers) {
   }
 }
 
-async function transfer (from, toAddress, amountToTransfer, transferFee, token, zksync, ethers) {
-  const closestPackableAmount = zksync.utils.closestPackableTransactionAmount(
-    ethers.utils.parseEther(amountToTransfer))
-  const closestPackableFee = zksync.utils.closestPackableTransactionFee(
-    ethers.utils.parseEther(transferFee))
+async function transfer (from, toAddress, amountToTransfer, transferFee, token, zksync, tokenSet) {
+  const closestPackableAmount = zksync.utils.closestPackableTransactionAmount(tokenSet.parseToken(token, amountToTransfer))
+  const closestPackableFee = zksync.utils.closestPackableTransactionFee(tokenSet.parseToken(token, transferFee))
 
   const transfer = await from.syncTransfer({
     to: toAddress,
@@ -74,14 +68,14 @@ async function transfer (from, toAddress, amountToTransfer, transferFee, token, 
   console.log(transferReceipt)
 }
 
-async function getFee(transactionType, address, token, zkSyncProvider, ethers) {
-  const feeInWei = await zkSyncProvider.getTransactionFee(transactionType, address, token)
-  return ethers.utils.formatEther(feeInWei.totalFee.toString())
+async function getFee(transactionType, address, token, zkSyncProvider, tokenSet) {
+  const fee = await zkSyncProvider.getTransactionFee(transactionType, address, token)
+  return tokenSet.formatToken(token, fee.totalFee)
 }
 
-async function withdrawToEthereum (wallet, amountToWithdraw, withdrawalFee, token, zksync, ethers) {
-  const closestPackableAmount = zksync.utils.closestPackableTransactionAmount(ethers.utils.parseEther(amountToWithdraw))
-  const closestPackableFee = zksync.utils.closestPackableTransactionFee(ethers.utils.parseEther(withdrawalFee))
+async function withdrawToEthereum (wallet, amountToWithdraw, withdrawalFee, token, zksync, tokenSet) {
+  const closestPackableAmount = zksync.utils.closestPackableTransactionAmount(tokenSet.parseToken(token, amountToWithdraw))
+  const closestPackableFee = zksync.utils.closestPackableTransactionFee(tokenSet.parseToken(token, withdrawalFee))
   const withdraw = await wallet.withdrawFromSyncToEthereum({
     ethAddress: wallet.address(),
     token: token,
@@ -90,21 +84,17 @@ async function withdrawToEthereum (wallet, amountToWithdraw, withdrawalFee, toke
   })
   await withdraw.awaitVerifyReceipt()
   console.log('ZKP verification is complete')
-  }
+}
 
-async function displayZkSyncBalance (wallet, ethers) {
+async function displayZkSyncBalance (wallet, tokenSet) {
   const state = await wallet.getAccountState()
-
-  if (state.committed.balances.ETH) {
-    console.log(`Commited ETH balance for ${wallet.address()}: ${ethers.utils.formatEther(state.committed.balances.ETH)}`)
-  } else {
-    console.log(`Commited ETH balance for ${wallet.address()}: 0`)
+  const commitedBbalances = state.committed.balances
+  const verifiedBalances = state.verified.balances
+  for (const property in commitedBbalances) {
+    console.log(`Commited ${property} balance for ${wallet.address()}: ${tokenSet.formatToken(property, commitedBbalances[property])}`)
   }
-
-  if (state.verified.balances.ETH) {
-    console.log(`Verified ETH balance for ${wallet.address()}: ${ethers.utils.formatEther(state.verified.balances.ETH)}`)
-  } else {
-    console.log(`Verified ETH balance for ${wallet.address()}: 0`)
+  for (const property in verifiedBalances) {
+    console.log(`Verified ${property} balance for ${wallet.address()}: ${tokenSet.formatToken(property, verifiedBalances[property])}`)
   }
 }
 
