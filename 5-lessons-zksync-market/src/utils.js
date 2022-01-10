@@ -1,3 +1,7 @@
+const ethers = require('ethers')
+const feeToken = 'ETH'
+const setSignKeyFee = 0.001.toString()
+
 async function getZkSyncProvider (zksync, networkName) {
   let zkSyncProvider
   try {
@@ -32,7 +36,8 @@ async function registerAccount (wallet) {
     if (await wallet.getAccountId() === undefined) {
       throw new Error('Unknown account')
     }
-    const changePubkey = await wallet.setSigningKey()
+    const changePubkey = await wallet.setSigningKey(
+        { feeToken: feeToken, fee: ethers.utils.parseEther(setSignKeyFee), ethAuthType: "ECDSA"})
     await changePubkey.awaitReceipt()
   }
   console.log(`Account ${wallet.address()} registered`)
